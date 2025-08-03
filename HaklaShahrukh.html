@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Minesweeper</title>
+  <style>
+    body { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #ccc; }
+    #game-board { display: grid; grid-template-columns: repeat(10, 30px); gap: 1px; }
+    .cell { width: 30px; height: 30px; background: #999; border: 1px solid #666; text-align: center; line-height: 30px; cursor: pointer; }
+    .cell.revealed { background: #eee; cursor: default; }
+    .cell.mine { background: #f00; }
+    .popup { position: fixed; width: 100px; height: 100px; display: none; }
+    #center-popup { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+    #tl-popup { top: 10px; left: 10px; }
+    #tr-popup { top: 10px; right: 10px; }
+    #bl-popup { bottom: 10px; left: 10px; }
+    #br-popup { bottom: 10px; right: 10px; }
+    button { margin-bottom: 10px; padding: 5px 10px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <button onclick="startNewGame()">New Game</button>
+  <div id="game-board"></div>
+  <img id="center-popup" class="popup" src="hakla shahrukh.jpeg" alt="Mine">
+  <img id="tl-popup" class="popup" src="hakla shahrukh.jpeg" alt="Mine">
+  <img id="tr-popup" class="popup" src="hakla shahrukh.jpeg" alt="Mine">
+  <img id="bl-popup" class="popup" src="hakla shahrukh.jpeg" alt="Mine">
+  <img id="br-popup" class="popup" src="hakla shahrukh.jpeg" alt="Mine">
+  <script>
+    const board = document.getElementById('game-board');
+    const cells = [];
+    const size = 10;
+    const safeCount = 5;
+    let gameOver = false;
+
+    function initializeBoard() {
+      board.innerHTML = '';
+      cells.length = 0;
+      gameOver = false;
+      for (let i = 0; i < size * size; i++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.dataset.index = i;
+        cell.addEventListener('click', () => revealCell(i));
+        board.appendChild(cell);
+        cells.push({ mine: true, revealed: false, adjacent: 0 });
+      }
+
+      // Place 5 safe cells
+      let safePlaced = 0;
+      while (safePlaced < safeCount) {
+        const index = Math.floor(Math.random() * size * size);
+        if (cells[index].mine) {
+          cells[index].mine = false;
+          safePlaced++;
+        }
+      }
+
+      // Calculate adjacent mines
+      for (let i = 0; i < size * size; i++) {
+        if (cells[i].mine) continue;
+        const row = Math.floor(i / size);
+        const col = i % size;
+        for (let dr = -1; dr <= 1; dr++) {
+          for (let dc = -1; dc <= 1; dc++) {
+            if (dr === 0 && dc === 0) continue;
+            const r = row + dr;
+            const c = col + dc;
+            if (r >= 0 && r < size && c >= 0 && c < size && cells[r * size + c].mine) {
+              cells[i].adjacent++;
+            }
+          }
+        }
+      }
+    }
+
+    // Audio 
+    const audio = new Audio('hakla shahrukh audio.mp3')
+
+    function revealCell(index) {
+      if (gameOver || cells[index].revealed) return;
+      cells[index].revealed = true;
+      const cell = board.children[index];
+      cell.classList.add('revealed');
+      if (cells[index].mine) {
+        cell.classList.add('mine');
+        gameOver = true;
+        showPopups();
+        // Add music playback here, e.g.:
+         ;
+         audio.currentTime = 0
+         audio.play();
+      } else if (cells[index].adjacent > 0) {
+        cell.textContent = cells[index].adjacent;
+      } else {
+        const row = Math.floor(index / size);
+        const col = index % size;
+        for (let dr = -1; dr <= 1; dr++) {
+          for (let dc = -1; dc <= 1; dc++) {
+            const r = row + dr;
+            const c = col + dc;
+            if (r >= 0 && r < size && c >= 0 && c < size) {
+              revealCell(r * size + c);
+            }
+          }
+        }
+      }
+    }
+
+    function showPopups() {
+      ['center-popup', 'tl-popup', 'tr-popup', 'bl-popup', 'br-popup'].forEach(id => {
+        const popup = document.getElementById(id);
+        popup.style.display = 'block';
+        setTimeout(() => popup.style.display = 'none', 3000);
+      });
+      // Replace 'mine.png' with your image path in the HTML img tags
+    }
+
+    function startNewGame() {
+      audio.pause()
+      initializeBoard();
+    }
+
+    initializeBoard();
+  </script>
+</body>
+</html>
