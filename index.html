@@ -29,7 +29,7 @@
     const board = document.getElementById('game-board');
     const cells = [];
     const size = 10;
-    const safeCount = 5;
+    const mineCount = 50;
     let gameOver = false;
 
     function initializeBoard() {
@@ -42,16 +42,16 @@
         cell.dataset.index = i;
         cell.addEventListener('click', () => revealCell(i));
         board.appendChild(cell);
-        cells.push({ mine: true, revealed: false, adjacent: 0 });
+        cells.push({ mine: false, revealed: false, adjacent: 0 });
       }
 
-      // Place 5 safe cells
-      let safePlaced = 0;
-      while (safePlaced < safeCount) {
+      // Place 50 mines randomly
+      let minesPlaced = 0;
+      while (minesPlaced < mineCount) {
         const index = Math.floor(Math.random() * size * size);
-        if (cells[index].mine) {
-          cells[index].mine = false;
-          safePlaced++;
+        if (!cells[index].mine) {
+          cells[index].mine = true;
+          minesPlaced++;
         }
       }
 
@@ -85,10 +85,8 @@
         cell.classList.add('mine');
         gameOver = true;
         showPopups();
-        // Add music playback here, e.g.:
-         ;
-         audio.currentTime = 0
-         audio.play();
+        audio.currentTime = 0
+        audio.play();
       } else if (cells[index].adjacent > 0) {
         cell.textContent = cells[index].adjacent;
       } else {
@@ -112,7 +110,6 @@
         popup.style.display = 'block';
         setTimeout(() => popup.style.display = 'none', 6000);
       });
-      // Replace 'mine.png' with your image path in the HTML img tags
     }
 
     function startNewGame() {
